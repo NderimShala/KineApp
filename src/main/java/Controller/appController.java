@@ -6,6 +6,13 @@ import Contrats.InterfaceMainFrame;
 import Contrats.InterfaceLogin;
 import Contrats.InterfaceLoginListener;
 import Contrats.InterfaceMenuListener;
+import Contrats.InterfaceKineDAO;
+import Contrats.InterfaceAuthentification;
+
+import Properties.KineDAO;
+
+import org.example.authentication.AuthentificationService;
+
 import View.LoginDialog;
 import entity.Kine;
 import entity.Patient;
@@ -20,12 +27,18 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
 
     private LoginDialog loginDialog;
 
+    private InterfaceKineDAO kineDAO;
+    private InterfaceAuthentification authentificationService;
+
     public appController(InterfaceKineModel interfaceKine, InterfacePatientModel interfacePatient, InterfaceMainFrame interfaceMainFrame, InterfaceLogin interfaceLogin) {
         this.interfaceKine = interfaceKine;
         this.interfacePatient = interfacePatient;
         this.interfaceMainFrame = interfaceMainFrame;
         this.interfaceLogin = interfaceLogin;
         this.loginDialog = (LoginDialog) interfaceLogin;
+
+        this.kineDAO = new KineDAO();
+        this.authentificationService = new AuthentificationService();
 
         interfaceLogin.setLoginListener(this); //enregistrer le controleur comme listener du login
         interfaceMainFrame.setLoginMenuListener(this);
