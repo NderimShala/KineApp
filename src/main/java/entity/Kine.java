@@ -1,8 +1,9 @@
 package entity;
 
 import java.util.Objects;
+import Contrats.InterfaceUtilisateur;
 
-public class Kine extends Person {
+public class Kine extends Person implements InterfaceUtilisateur{
     private String specialisation;
     private String inami;
     private String kinePhoto;
@@ -43,6 +44,11 @@ public class Kine extends Person {
 
     public void setKinePhoto(String kinePhoto) {
         this.kinePhoto = kinePhoto;
+    }
+
+    @Override
+    public String getPhoto(){
+        return kinePhoto;
     }
 
     @Override

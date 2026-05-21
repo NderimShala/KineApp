@@ -1,6 +1,7 @@
 package Properties;
 
 import Contrats.InterfaceKineDAO;
+import Contrats.InterfaceUtilisateur;
 import entity.Kine;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Optional;
 public class KineDAO implements InterfaceKineDAO {
 
     private Map<String, String> credentials; //stocker username -> password
-    private Map<String, Kine> kines; //stocker les différents kines : username -> kine
+    private Map<String, InterfaceUtilisateur> kines; //stocker les différents kines : username -> kine
 
     public KineDAO(){
         this.credentials = new HashMap<>();
@@ -27,7 +28,9 @@ public class KineDAO implements InterfaceKineDAO {
     }
 
     @Override
-    public Optional<Kine> findByUsername(String username){
+    public Optional<InterfaceUtilisateur> findByUsername(String username){
+        System.out.println("recherche utilisateur" + username);
+        System.out.println("utilisateurs dispo" + kines.keySet());
         return Optional.ofNullable(kines.get(username));
     }
     @Override
@@ -35,19 +38,26 @@ public class KineDAO implements InterfaceKineDAO {
         return kines.containsKey(username);
     }
     @Override
-    public void save(String username, String password, Kine kine){
+    public void save(String username, String password, InterfaceUtilisateur kine){
         if(username != null && !username.isBlank() && password != null && !password.isBlank() && kine != null){
             credentials.put(username, password);
             kines.put(username, kine);
+            System.out.println("kine sauvegardé" + username);
+            System.out.println("total utilisateurs"+ kines.size());
         }
     }
 
     @Override
-    public boolean checkPassword(String password, String username){
+    public boolean checkPassword(String username, String password){
+        System.out.println("verif : username :" + username + ", password : "+password);
         if (!credentials.containsKey(username)) {
+            System.out.println("username non trouvé");
             return false;
         }
-        return credentials.get(username).equals(password);
+        String storedPassword = credentials.get(username);
+        System.out.println("password stocké : " + storedPassword);
+        System.out.println("password fourni : " + password);
+        return storedPassword.equals(password);
     }
 
     @Override

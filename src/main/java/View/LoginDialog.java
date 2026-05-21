@@ -88,16 +88,19 @@ public class LoginDialog extends JDialog implements InterfaceLogin {
 
         // ✅ AJOUTER LES ACTIONLISTENERS
         buttonOK.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 onOK();
             }
         });
 
         buttonCancel.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
         });
+
 
         // Fermer si on clique le X
         addWindowListener(new WindowAdapter() {

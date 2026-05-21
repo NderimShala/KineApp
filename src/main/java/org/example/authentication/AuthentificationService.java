@@ -2,22 +2,24 @@ package org.example.authentication;
 
 import Contrats.InterfaceAuthentification;
 import Contrats.InterfaceKineDAO;
-import entity.Kine;
+import Contrats.InterfaceUtilisateur;
 import java.util.Optional;
+
+import entity.Kine;
 
 public class AuthentificationService implements InterfaceAuthentification{
     //référence au DAO
     private InterfaceKineDAO kineDAO;
 
     //stocker le kine actuellement connecté
-    private Kine kineconnecte = null;
+    private InterfaceUtilisateur kineconnecte = null;
 
-    public AuthentificationService(){
+    public AuthentificationService(InterfaceKineDAO kineDAO){
         this.kineDAO = kineDAO;
     }
 
     @Override
-    public Kine authentification(String username, String password){
+    public InterfaceUtilisateur authentification(String username, String password){
         if(username == null || password == null || username.isBlank() ||password.isBlank()){
             return null;
         }
@@ -26,7 +28,7 @@ public class AuthentificationService implements InterfaceAuthentification{
             return null;
         }
         //récup Kine via DAO
-        Optional<Kine> kine = kineDAO.findByUsername(username);
+        Optional<InterfaceUtilisateur> kine = kineDAO.findByUsername(username);
         if(kine.isPresent()){
             this.kineconnecte = kine.get();
             return kineconnecte;
@@ -35,7 +37,7 @@ public class AuthentificationService implements InterfaceAuthentification{
     }
 
     @Override
-    public Kine getKineConnected(){
+    public InterfaceUtilisateur getKineConnected(){
         return kineconnecte;
     }
 
@@ -50,8 +52,9 @@ public class AuthentificationService implements InterfaceAuthentification{
     }
 
     @Override
-    public void addKine(String username, String password, String name, String firstname, String specialisation, String inami, String photo){
-        Kine newKine = new Kine(name, firstname, specialisation, inami, photo);
+    public InterfaceUtilisateur addKine(String username, String password, String name, String firstname, String specialisation, String inami, String photo){
+        InterfaceUtilisateur newKine = new Kine(name, firstname, specialisation, inami, photo);
         kineDAO.save(username, password, newKine);
+        return newKine;
     }
 }

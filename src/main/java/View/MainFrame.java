@@ -108,6 +108,10 @@ public class MainFrame extends JFrame implements InterfaceMainFrame{
     public void desactiverMenuItemLogout(){
         itemLogout.setEnabled(false);
     }
+    @Override
+    public void activerMenuItemLogin(){itemLogin.setEnabled(true);}
+    @Override
+    public void desactiverMenuItemLogin(){itemLogin.setEnabled(false);}
 
     @Override
     public void setLoginMenuListener(InterfaceMenuListener listener){

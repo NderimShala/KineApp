@@ -5,6 +5,8 @@ public interface InterfaceMainFrame {
     public void desactiverMenuItemPatient();
     public void activerMenuItemLogout();
     public void desactiverMenuItemLogout();
+    public void activerMenuItemLogin();
+    public void desactiverMenuItemLogin();
 
     public void setLoginMenuListener(InterfaceMenuListener listener);
 }
