@@ -1,19 +1,8 @@
 package Controller;
 
-import Contrats.InterfaceKineModel;
-import Contrats.InterfacePatientModel;
-import Contrats.InterfaceMainFrame;
-import Contrats.InterfaceLogin;
-import Contrats.InterfaceLoginListener;
-import Contrats.InterfaceMenuListener;
-import Contrats.InterfaceKineDAO;
-import Contrats.InterfaceAuthentification;
-import Contrats.InterfaceUtilisateur;
-import Contrats.InterfaceNouveauKineListener;
-import Contrats.InterfaceNouveauPatient;
-import Contrats.InterfaceNouveauPatientListener;
+import Contrats.*;
 
-import Properties.KineDAO;
+import Properties.*;
 
 import org.example.authentication.AuthentificationService;
 
@@ -38,6 +27,8 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     private InterfaceKineDAO kineDAO;
     private InterfaceAuthentification authentificationService;
 
+    private InterfaceEntityService<Patient> patientService;
+
     private String usernameEnAttente;
     private String passwordEnAttente;
 
@@ -56,6 +47,8 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
 
         this.kineDAO = new KineDAO();
         this.authentificationService = new AuthentificationService(kineDAO);
+
+        this.patientService = new PatientsService();
 
         interfaceLogin.setLoginListener(this); //enregistrer le controleur comme listener du login
         interfaceMainFrame.setLoginMenuListener(this);
@@ -181,14 +174,18 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
 
     @Override
     public void onNouveauPatientClicked(String nom, String prenom, String mutuelle, String nomPatho) {
-        Pathologie patho = new Pathologie();
-        patho.setName(nomPatho);
-        Patient patient = new Patient(nom, prenom, mutuelle, patho);
+        Patient patient = patientService.creer(nom, prenom, mutuelle, nomPatho);
         interfacePatient.afficherPatient(patient);
     }
 
     @Override
     public void onCancelPatientClicked() {
         nouveauPatientDialog.fermer();
+    }
+
+    @Override
+    public void onAjouterPatientMenuClicked(){
+        System.out.println("ouverture du dialog pour ajouter un patient");
+        nouveauPatientDialog.setVisible(true);
     }
 }

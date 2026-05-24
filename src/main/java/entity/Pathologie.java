@@ -1,5 +1,6 @@
 package entity;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -9,6 +10,11 @@ public class Pathologie {
 
     public Pathologie() {
         this.name = "default";
+        this.objectif = new Objectif[0];
+    }
+
+    public Pathologie(String nom){
+        this.name = name;
         this.objectif = new Objectif[0];
     }
 

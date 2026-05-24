@@ -67,6 +67,15 @@ public class MainFrame extends JFrame implements InterfaceMainFrame{
         itemAjout = new JMenuItem("ajouter");
         itemSuppr = new JMenuItem("Supprimer");
         itemOuvrir = new JMenuItem("Ouvrir");
+
+        itemAjout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(loginMenuListener != null){
+                    loginMenuListener.onAjouterPatientMenuClicked();
+                }
+            }
+        });
         menuPatient.add(itemAjout);
         menuPatient.add(itemSuppr);
         menuPatient.add(itemOuvrir);

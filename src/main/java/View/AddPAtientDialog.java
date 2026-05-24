@@ -2,6 +2,8 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+
 import Contrats.InterfaceNouveauPatient;
 import Contrats.InterfaceNouveauPatientListener;
 
@@ -89,6 +91,24 @@ public class AddPAtientDialog extends JDialog implements InterfaceNouveauPatient
         getRootPane().setDefaultButton(buttonOK);
         pack();
 
+        buttonOK.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) { onOk();}
+        });
+
+        buttonCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
 
     }
     @Override
@@ -129,6 +149,7 @@ public class AddPAtientDialog extends JDialog implements InterfaceNouveauPatient
     private void onOk(){
         if(listener!= null){
             listener.onNouveauPatientClicked(getNom(), getPrenom(), getMutuelle(), getNomPatho());
+            this.setVisible(false);
         }
     }
 
