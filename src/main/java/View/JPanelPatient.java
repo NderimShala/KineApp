@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 import Contrats.InterfacePatientModel;
+import Contrats.InterfaceAddObjectifListener;
 
 public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JLabel nomLabel;
@@ -22,6 +23,8 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JButton boutonAjout;
     private JButton boutonSupprime;
     private JButton boutonValider;
+
+    private InterfaceAddObjectifListener listener;
 
     private java.util.Set<Integer> lignesValidees = new java.util.HashSet<>(); //variable pour stocker les lignes validées
 
@@ -99,9 +102,10 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         boutonAjout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Vector ligne = new Vector();
-                ligne.add("truc");
-                tableModel.addRow(ligne);
+                if(listener != null){
+                    listener.onAjouterObjectifClicked();
+                }
+
             }
         });
         boutonSupprime.addActionListener(new ActionListener() {
@@ -125,7 +129,13 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
     }
+
+    public void setListener(InterfaceAddObjectifListener listener){
+        this.listener = listener;
+    }
+
     @Override
     public void afficherPatient(Patient patient) {
         // Afficher les infos du patient

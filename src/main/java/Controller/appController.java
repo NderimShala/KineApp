@@ -4,17 +4,15 @@ import Contrats.*;
 
 import Properties.*;
 
+import View.*;
 import org.example.authentication.AuthentificationService;
 
-import View.LoginDialog;
-import View.NouveauKineDialog;
-import View.AddPAtientDialog;
 import entity.Kine;
 import entity.Patient;
 import entity.Pathologie;
 import entity.Objectif;
 
-public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener{
+public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceAddObjectifListener{
     private InterfaceKineModel interfaceKine; //stocker la ref à la vue
     private InterfacePatientModel interfacePatient;
     private InterfaceMainFrame interfaceMainFrame;
@@ -23,14 +21,17 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     private LoginDialog loginDialog;
     private NouveauKineDialog nouveauKineDialog;
     private AddPAtientDialog nouveauPatientDialog;
+    private AddObjectifDialog objectifDialog;
 
     private InterfaceKineDAO kineDAO;
     private InterfaceAuthentification authentificationService;
 
     private InterfaceEntityService<Patient> patientService;
+    private ObjectifService objectifService;
 
     private String usernameEnAttente;
     private String passwordEnAttente;
+    private Patient patientCourant;
 
     public appController(InterfaceKineModel interfaceKine, InterfacePatientModel interfacePatient, InterfaceMainFrame interfaceMainFrame, InterfaceLogin interfaceLogin) {
         this.interfaceKine = interfaceKine;
@@ -45,19 +46,24 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
         this.nouveauPatientDialog = new AddPAtientDialog();
         this.nouveauPatientDialog.setListener(this); //enregistrer le controleur comme listener du nouveau patient dialog
 
+        this.objectifDialog = new AddObjectifDialog();
+
         this.kineDAO = new KineDAO();
         this.authentificationService = new AuthentificationService(kineDAO);
 
         this.patientService = new PatientsService();
+        this.objectifService = new ObjectifService();
 
         interfaceLogin.setLoginListener(this); //enregistrer le controleur comme listener du login
         interfaceMainFrame.setLoginMenuListener(this);
 
 
-
         initialiserKine();
         initialiserPatient();
         initlaiserFrame();
+
+        JPanelPatient patientPanel = (JPanelPatient) interfacePatient;
+        patientPanel.setListener(this);
     }
 
     public void initialiserKine(){
@@ -76,6 +82,7 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
         Patient patientDefault = new Patient();
         patientDefault.setMaladie(pathoDefault);
 
+        this.patientCourant = patientDefault;
         interfacePatient.afficherPatient(patientDefault);
         interfacePatient.desactiverBoutton();
     }
@@ -175,6 +182,7 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     @Override
     public void onNouveauPatientClicked(String nom, String prenom, String mutuelle, String nomPatho) {
         Patient patient = patientService.creer(nom, prenom, mutuelle, nomPatho);
+        this.patientCourant = patient;
         interfacePatient.afficherPatient(patient);
     }
 
@@ -187,5 +195,18 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     public void onAjouterPatientMenuClicked(){
         System.out.println("ouverture du dialog pour ajouter un patient");
         nouveauPatientDialog.setVisible(true);
+    }
+
+    @Override
+    public void onAjouterObjectifClicked(){
+        String nomObjectif = objectifDialog.afficherEtRecupererNomObjectif();
+        if(nomObjectif != null && !nomObjectif.isBlank()){
+            Objectif objectif = objectifService.creer(nomObjectif);
+
+            if(patientCourant != null){
+                objectifService.ajouterObjectifPatient(patientCourant, objectif);
+                interfacePatient.afficherPatient(patientCourant);
+            }
+        }
     }
 }
