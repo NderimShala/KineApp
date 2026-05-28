@@ -12,7 +12,7 @@ import entity.Patient;
 import entity.Pathologie;
 import entity.Objectif;
 
-public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceAddObjectifListener{
+public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceAddObjectifListener, InterfaceSupprObjectifListener{
     private InterfaceKineModel interfaceKine; //stocker la ref à la vue
     private InterfacePatientModel interfacePatient;
     private InterfaceMainFrame interfaceMainFrame;
@@ -32,6 +32,8 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     private String usernameEnAttente;
     private String passwordEnAttente;
     private Patient patientCourant;
+
+    private JPanelPatient patientPanel;
 
     public appController(InterfaceKineModel interfaceKine, InterfacePatientModel interfacePatient, InterfaceMainFrame interfaceMainFrame, InterfaceLogin interfaceLogin) {
         this.interfaceKine = interfaceKine;
@@ -62,8 +64,9 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
         initialiserPatient();
         initlaiserFrame();
 
-        JPanelPatient patientPanel = (JPanelPatient) interfacePatient;
-        patientPanel.setListener(this);
+        this.patientPanel = (JPanelPatient) interfacePatient;
+        patientPanel.setListenerAjouter(this);
+        patientPanel.setListenerSupprimer(this);
     }
 
     public void initialiserKine(){
@@ -72,18 +75,6 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     }
 
     public void initialiserPatient(){
-        Objectif objectifDefault1 = new Objectif("default");
-        Objectif objectifDefault2 = new Objectif("default");
-        Objectif[] objectifs = {objectifDefault1, objectifDefault2};
-
-        Pathologie pathoDefault = new Pathologie();
-        pathoDefault.setObjectif(objectifs);
-
-        Patient patientDefault = new Patient();
-        patientDefault.setMaladie(pathoDefault);
-
-        this.patientCourant = patientDefault;
-        interfacePatient.afficherPatient(patientDefault);
         interfacePatient.desactiverBoutton();
     }
 
@@ -205,6 +196,18 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
 
             if(patientCourant != null){
                 objectifService.ajouterObjectifPatient(patientCourant, objectif);
+                interfacePatient.afficherPatient(patientCourant);
+            }
+        }
+    }
+
+
+    @Override
+    public void onSupprObjectifClicked() {
+        if(patientCourant != null){
+            int indexSelected = patientPanel.getSelectedObjectifIndex();
+            if(indexSelected >= 0){
+                objectifService.supprimerObjectifPatient(patientCourant, indexSelected);
                 interfacePatient.afficherPatient(patientCourant);
             }
         }

@@ -7,6 +7,7 @@ import entity.Pathologie;
 import java.nio.file.Path;
 
 public class PatientsService implements InterfaceEntityService<Patient> {
+
     @Override
     public Patient creer(String... parametres) {
         String nom = parametres[0];

@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.StringCharacterIterator;
+import java.io.File;
 
 import Contrats.InterfaceNouveauKine;
 import Contrats.InterfaceNouveauKineListener;
@@ -16,7 +17,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
     private JTextField prenomKine;
     private JTextField specialisation;
     private JTextField inami;
-    private JTextField photo;
+    private JButton photoButton;
     private JLabel nomLabel;
     private JLabel prnomLabel;
     private JLabel specialisationLabel;
@@ -25,6 +26,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
 
     private String usernameEnAttente;
     private String passwordEnAttente;
+    private String photoSelectionnee = "/default.jpg";
 
     //listener pour communiquer avec le controleur
     private InterfaceNouveauKineListener listener;
@@ -54,7 +56,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
         inami = new JTextField(15);
 
         photoLabel = new JLabel("Photo");
-        photo = new JTextField(15);
+        photoButton = new JButton("Choisir une photo");
 
         buttonOK = new JButton("OK");
         buttonCancel = new JButton("Cancel");
@@ -88,7 +90,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
         contentPane.add(photoLabel, gbc);
         gbc.gridx = 1;
         gbc.gridy = 4;
-        contentPane.add(photo, gbc);
+        contentPane.add(photoButton, gbc);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(buttonOK);
@@ -116,6 +118,13 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
             }
         });
 
+        photoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ouvrirSelecteurPhoto();
+            }
+        });
+
          addWindowListener(new WindowAdapter() {
              @Override
              public void windowClosing(WindowEvent e) {
@@ -128,6 +137,22 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
     public void setLoginCredentials(String username, String password){
         this.usernameEnAttente = username;
         this.passwordEnAttente = password;
+    }
+
+    public void ouvrirSelecteurPhoto(){
+        JFileChooser fileChooser = new JFileChooser();
+
+        //pointer vers le dossier ressources
+        String resourcePath = System.getProperty("user.dir") +
+                            File.separator + "src" +
+                            File.separator + "main" +
+                            File.separator + "resources";
+        fileChooser.setCurrentDirectory(new File(resourcePath));
+
+        int result = fileChooser.showOpenDialog(this);
+        java.io.File selectedFile = fileChooser.getSelectedFile();
+        this.photoSelectionnee = "/" + selectedFile.getName();
+        photoButton.setText("Photo : " + selectedFile.getName() );
     }
 
     //méthode de l'interface NouveauKine
@@ -153,8 +178,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
 
     @Override
     public String getPhoto(){
-        if (photo.getText().isEmpty()) return "/default.jpg";
-        else return photo.getText();
+        return photoSelectionnee;
     }
 
     @Override
@@ -172,6 +196,7 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
             listener.onNouveauKineClicked(usernameEnAttente, passwordEnAttente,getNom(), getPrenom(), getSpecialisation(), getInami(), getPhoto());
         }
     }
+
 
     private void onCancel(){
         if(listener != null) listener.onCancelClicked();

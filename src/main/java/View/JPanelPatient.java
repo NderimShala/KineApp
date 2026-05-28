@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.Vector;
 import Contrats.InterfacePatientModel;
 import Contrats.InterfaceAddObjectifListener;
+import Contrats.InterfaceSupprObjectifListener;
 
 public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JLabel nomLabel;
@@ -24,7 +25,8 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JButton boutonSupprime;
     private JButton boutonValider;
 
-    private InterfaceAddObjectifListener listener;
+    private InterfaceAddObjectifListener listenerAdd;
+    private InterfaceSupprObjectifListener listenerSuppr;
 
     private java.util.Set<Integer> lignesValidees = new java.util.HashSet<>(); //variable pour stocker les lignes validées
 
@@ -102,8 +104,8 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         boutonAjout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(listener != null){
-                    listener.onAjouterObjectifClicked();
+                if(listenerAdd != null){
+                    listenerAdd.onAjouterObjectifClicked();
                 }
 
             }
@@ -111,8 +113,9 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         boutonSupprime.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int indice = objectifsTable.getSelectedRow();
-                tableModel.removeRow(indice);
+                if(listenerSuppr != null){
+                    listenerSuppr.onSupprObjectifClicked();
+                }
             }
         });
         boutonValider.addActionListener(new ActionListener() {
@@ -132,8 +135,13 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
 
     }
 
-    public void setListener(InterfaceAddObjectifListener listener){
-        this.listener = listener;
+    public void setListenerAjouter(InterfaceAddObjectifListener listenerAdd){
+        this.listenerAdd = listenerAdd;
+    }
+    public void setListenerSupprimer(InterfaceSupprObjectifListener listenerSuppr) {this.listenerSuppr = listenerSuppr; }
+
+    public int getSelectedObjectifIndex(){
+        return objectifsTable.getSelectedRow();
     }
 
     @Override

@@ -14,6 +14,19 @@ public class ObjectifService implements InterfaceEntityService<Objectif>{
         patient.getMaladie().setObjectif(nouveauxObjectifs);
     }
 
+    public void supprimerObjectifPatient(Patient patient, int indexObjectif){
+        Objectif[] objectifsExistants = patient.getMaladie().getObjectif();
+        Objectif[] nouveauObjectifs = new Objectif[objectifsExistants.length - 1];
+        int index = 0;
+        for(int i = 0; i< objectifsExistants.length; i++){
+            if(i != indexObjectif){
+                nouveauObjectifs[index] = objectifsExistants[i];
+                index++;
+            }
+        }
+        patient.getMaladie().setObjectif(nouveauObjectifs);
+    }
+
     @Override
     public Objectif creer(String... parametres) {
         String nomObjectif = parametres[0];
