@@ -1,9 +1,10 @@
 package entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 import Contrats.InterfaceUtilisateur;
 
-public class Kine extends Person implements InterfaceUtilisateur{
+public class Kine extends Person implements InterfaceUtilisateur, Serializable {
     private String specialisation;
     private String inami;
     private String kinePhoto;

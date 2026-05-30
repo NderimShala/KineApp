@@ -1,8 +1,9 @@
 package entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Objectif {
+public class Objectif implements Serializable {
     private String name;
 
     public Objectif() {

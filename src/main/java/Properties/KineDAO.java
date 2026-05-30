@@ -3,11 +3,23 @@ package Properties;
 import Contrats.InterfaceKineDAO;
 import Contrats.InterfaceUtilisateur;
 import entity.Kine;
+
+import javax.sound.sampled.DataLine;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.io.*;
 
 public class KineDAO implements InterfaceKineDAO {
+    private static final String CredentialsFilePath =
+                    System.getProperty("user.dir") + File.separator + "src" + File.separator +
+                    "main" + File.separator + "resources" + File.separator + "data" +
+                    File.separator + "credentials.bin";
+
+    private static final String KineFilePath =
+                    System.getProperty("user.dir") + File.separator + "src" + File.separator +
+                    "main" + File.separator + "resources" + File.separator + "data" +
+                    File.separator + "kines.bin";
 
     private Map<String, String> credentials; //stocker username -> password
     private Map<String, InterfaceUtilisateur> kines; //stocker les différents kines : username -> kine
@@ -16,7 +28,61 @@ public class KineDAO implements InterfaceKineDAO {
         this.credentials = new HashMap<>();
         this.kines = new HashMap<>();
 
-        initializeDefaultUsers();
+        creerDossierSiNecessaire();
+        loadKines();
+
+        if(kines.isEmpty()){
+            initializeDefaultUsers();
+            saveKines();
+        }
+    }
+
+    private void creerDossierSiNecessaire(){
+        File dataKines = new File(System.getProperty("user.dir") + File.separator + "src" +
+                        File.separator + "main" + File.separator + "resources" +
+                        File.separator + "data");
+        if(!dataKines.exists()){
+            dataKines.mkdirs();
+            System.out.println("Dossier créé avec succès : " + dataKines.getAbsolutePath());
+        }
+    }
+
+    private void saveKines(){
+        try (ObjectOutputStream oosCredentials = new ObjectOutputStream(new FileOutputStream(CredentialsFilePath))){
+            oosCredentials.writeObject(credentials);
+        }catch(IOException e){
+            System.out.println("Erreur de sauvegarde des credentials : " + e.getMessage());
+        }
+        try (ObjectOutputStream oosKines = new ObjectOutputStream(new FileOutputStream(KineFilePath))){
+            oosKines.writeObject(kines);
+            System.out.println("kine souvegardés avec succès");
+        }catch(IOException e) {
+            System.out.println("Erreur de sauvegarde des kines : " + e.getMessage());
+        }
+    }
+
+    private void loadKines(){
+        File credFile = new File(CredentialsFilePath);
+        File kineFile = new File(KineFilePath);
+
+        if(credFile.exists()){
+            try (ObjectInputStream oisCredentials = new ObjectInputStream(new FileInputStream(CredentialsFilePath))){
+                this.credentials = (Map<String, String>) oisCredentials.readObject();
+                System.out.println("credentials chargés avec succès");
+            }catch( IOException | ClassNotFoundException e){
+                System.out.println("erreur du load des credentials : " + e.getMessage());
+                this.credentials = new HashMap<>();
+            }
+        }
+        if(kineFile.exists()){
+            try(ObjectInputStream oisKines = new ObjectInputStream(new FileInputStream(KineFilePath))){
+                this.kines = (Map<String, InterfaceUtilisateur>) oisKines.readObject();
+                System.out.println("kines chargés avec succès");
+            }catch(IOException | ClassNotFoundException e){
+                System.err.println("erreurs de chargement des kines : " + e.getMessage());
+                this.kines = new HashMap<>();
+            }
+        }
     }
 
     private void initializeDefaultUsers(){
@@ -44,6 +110,7 @@ public class KineDAO implements InterfaceKineDAO {
             kines.put(username, kine);
             System.out.println("kine sauvegardé" + username);
             System.out.println("total utilisateurs"+ kines.size());
+            saveKines();
         }
     }
 

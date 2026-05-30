@@ -1,4 +1,5 @@
 package Controller;
+import javax.swing.JOptionPane;
 
 import Contrats.*;
 
@@ -12,6 +13,8 @@ import entity.Patient;
 import entity.Pathologie;
 import entity.Objectif;
 
+import javax.swing.*;
+
 public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceAddObjectifListener, InterfaceSupprObjectifListener{
     private InterfaceKineModel interfaceKine; //stocker la ref à la vue
     private InterfacePatientModel interfacePatient;
@@ -22,16 +25,20 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     private NouveauKineDialog nouveauKineDialog;
     private AddPAtientDialog nouveauPatientDialog;
     private AddObjectifDialog objectifDialog;
+    private OuvrirPatientDialog ouvrirPatientDialog;
+    private SupprPatientDialog supprPatientDialog;
 
     private InterfaceKineDAO kineDAO;
     private InterfaceAuthentification authentificationService;
 
-    private InterfaceEntityService<Patient> patientService;
+    private PatientsService patientService;
     private ObjectifService objectifService;
 
     private String usernameEnAttente;
     private String passwordEnAttente;
     private Patient patientCourant;
+
+    private PatientDAO patientDAO;
 
     private JPanelPatient patientPanel;
 
@@ -48,9 +55,13 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
         this.nouveauPatientDialog = new AddPAtientDialog();
         this.nouveauPatientDialog.setListener(this); //enregistrer le controleur comme listener du nouveau patient dialog
 
+        this.ouvrirPatientDialog = new OuvrirPatientDialog();
+        this.supprPatientDialog = new SupprPatientDialog();
+
         this.objectifDialog = new AddObjectifDialog();
 
         this.kineDAO = new KineDAO();
+        this.patientDAO = new PatientDAO();
         this.authentificationService = new AuthentificationService(kineDAO);
 
         this.patientService = new PatientsService();
@@ -75,6 +86,9 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     }
 
     public void initialiserPatient(){
+        Patient patientDefault = patientService.creerPatientDefault();
+        this.patientCourant = patientDefault;
+        interfacePatient.afficherPatient(patientDefault);
         interfacePatient.desactiverBoutton();
     }
 
@@ -174,6 +188,9 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     public void onNouveauPatientClicked(String nom, String prenom, String mutuelle, String nomPatho) {
         Patient patient = patientService.creer(nom, prenom, mutuelle, nomPatho);
         this.patientCourant = patient;
+        System.out.println("avant addPatient du DAO");
+        patientDAO.addPatient(patient);
+        System.out.println("après addPatient du DAO");
         interfacePatient.afficherPatient(patient);
     }
 
@@ -196,6 +213,7 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
 
             if(patientCourant != null){
                 objectifService.ajouterObjectifPatient(patientCourant, objectif);
+                patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
                 interfacePatient.afficherPatient(patientCourant);
             }
         }
@@ -208,7 +226,47 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
             int indexSelected = patientPanel.getSelectedObjectifIndex();
             if(indexSelected >= 0){
                 objectifService.supprimerObjectifPatient(patientCourant, indexSelected);
+                patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
                 interfacePatient.afficherPatient(patientCourant);
+            }
+        }
+    }
+
+    @Override
+    public void onOuvrirPatientMenuClicked() {
+        String nomRecherche = ouvrirPatientDialog.afficherEtRecupererNomPatient();
+        if(nomRecherche != null && !nomRecherche.isBlank()){
+            Patient patientTrouve = patientDAO.findByName(nomRecherche);
+            if(patientTrouve != null) {
+                this.patientCourant = patientTrouve;
+                interfacePatient.afficherPatient(patientTrouve);
+                System.out.println("patient trouvé et affiché");
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "patient inexistant", "erreur", JOptionPane.ERROR_MESSAGE);
+
+            }
+        }
+    }
+
+    @Override
+    public void onSupprPatientMenuClicked() {
+        String nomRecherche = supprPatientDialog.afficherEtRecupererNomPatient();
+        if(nomRecherche != null && !nomRecherche.isBlank()){
+            Patient patientASupprimer = patientDAO.findByName(nomRecherche);
+            if(patientASupprimer != null){
+                int confirmation = JOptionPane.showConfirmDialog(null, "Êtes-vous sûr de vouloir supprimer le patient : " + nomRecherche + " ?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
+                if(confirmation == JOptionPane.YES_OPTION){
+                    patientDAO.deleteByName(nomRecherche);
+                    if(patientCourant != null && patientCourant.getName().equalsIgnoreCase(nomRecherche)){
+                        this.patientCourant = patientService.creerPatientDefault();
+                        interfacePatient.afficherPatient(patientCourant);
+                    }
+                    JOptionPane.showMessageDialog(null, "patient supprimé avec succès : " + nomRecherche, "Succès", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "patient inexistant", "erreur", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

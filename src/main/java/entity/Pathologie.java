@@ -1,10 +1,11 @@
 package entity;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Pathologie {
+public class Pathologie implements Serializable {
     private String name;
     private Objectif[] objectif;
 

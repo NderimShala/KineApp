@@ -1,8 +1,9 @@
 package entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Patient extends Person {
+public class Patient extends Person implements Serializable {
     private String mutuelle;
     private Pathologie maladie;
 

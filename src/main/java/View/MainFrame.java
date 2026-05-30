@@ -77,7 +77,25 @@ public class MainFrame extends JFrame implements InterfaceMainFrame{
             }
         });
         menuPatient.add(itemAjout);
+
+        itemSuppr.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(loginMenuListener != null){
+                    loginMenuListener.onSupprPatientMenuClicked();
+                }
+            }
+        });
         menuPatient.add(itemSuppr);
+
+        itemOuvrir.addActionListener(new  ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                if(loginMenuListener != null){
+                    loginMenuListener.onOuvrirPatientMenuClicked();
+                }
+            }
+        });
         menuPatient.add(itemOuvrir);
         menu.add(menuPatient);
 
