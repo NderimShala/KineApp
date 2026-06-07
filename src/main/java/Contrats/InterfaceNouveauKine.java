@@ -7,6 +7,9 @@ public interface InterfaceNouveauKine {
     public String getInami();
     public String getPhoto();
 
+    public void afficherMessageSuccesKine();
+    public void afficherMessageErreurKine(String message);
+
     //enregister le listener (contrôleur)
     public void setListener(InterfaceNouveauKineListener listener);
 

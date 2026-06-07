@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="KineAPP:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/KineAPP_jar</output-path>
+    <root id="archive" name="KineAPP.jar">
+      <element id="module-output" name="KineAPP" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/formdev/flatlaf/3.2.5/flatlaf-3.2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/formdev/flatlaf-extras/3.2.5/flatlaf-extras-3.2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/formdev/flatlaf-intellij-themes/3.2.5/flatlaf-intellij-themes-3.2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/weisj/jsvg/1.2.0/jsvg-1.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

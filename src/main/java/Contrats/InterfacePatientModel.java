@@ -6,4 +6,7 @@ public interface InterfacePatientModel {
     public void afficherPatient(Patient patient);
     public void activerBoutton();
     public void desactiverBoutton();
+
+
+    public void afficherMessageErreur(String message);
 }

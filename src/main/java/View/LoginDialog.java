@@ -1,177 +1,168 @@
+
 package View;
 
-import Contrats.InterfaceLogin;
-import Contrats.InterfaceLoginListener;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import Contrats.InterfaceLogin;
+import Contrats.InterfaceLoginListener;
 
-// ✅ LoginDialog implémente InterfaceLogin
 public class LoginDialog extends JDialog implements InterfaceLogin {
-    private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
-    private JCheckBox checkBoxNouveau;
-    private JPasswordField passwordField1;
-    private JTextField textField1;
-    private JLabel UsernameField;
-    private JLabel PassField;
-
-    // ✅ Listener pour communiquer avec le contrôleur
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JCheckBox isNouveauCheckBox;
+    private JButton btnLogin;
+    private JButton btnCancel;
     private InterfaceLoginListener loginListener;
 
     public LoginDialog() {
-        setTitle("LOGIN");
-        setModal(true);
+        super();
+        setTitle("Connexion KineAPP");
+        setSize(400, 250);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        setModal(true);
+        setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        setResizable(false);
 
-        // ✅ CRÉER LE PANEL PRINCIPAL
-        contentPane = new JPanel();
-        contentPane.setLayout(new GridBagLayout());
-        contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        // Panel principal
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // ✅ CRÉER LES COMPOSANTS
-        UsernameField = new JLabel("Username:");
-        textField1 = new JTextField(15);
-
-        PassField = new JLabel("Password:");
-        passwordField1 = new JPasswordField(15);
-
-        checkBoxNouveau = new JCheckBox("Nouveau");
-
-        buttonOK = new JButton("OK");
-        buttonCancel = new JButton("Cancel");
-
-        // ✅ AJOUTER LE LABEL USERNAME
+        // Label Username
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setFont(new Font("Arial", Font.BOLD, 12));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        contentPane.add(UsernameField, gbc);
+        mainPanel.add(usernameLabel, gbc);
 
-        // ✅ AJOUTER LE TEXTFIELD USERNAME
+        // Field Username
+        usernameField = new JTextField(20);
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 12));
         gbc.gridx = 1;
         gbc.gridy = 0;
-        contentPane.add(textField1, gbc);
+        mainPanel.add(usernameField, gbc);
 
-        // ✅ AJOUTER LE LABEL PASSWORD
+        // Label Password
+        JLabel passwordLabel = new JLabel("Mot de passe:");
+        passwordLabel.setFont(new Font("Arial", Font.BOLD, 12));
         gbc.gridx = 0;
         gbc.gridy = 1;
-        contentPane.add(PassField, gbc);
+        mainPanel.add(passwordLabel, gbc);
 
-        // ✅ AJOUTER LE PASSWORDFIELD
+        // Field Password
+        passwordField = new JPasswordField(20);
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 12));
         gbc.gridx = 1;
         gbc.gridy = 1;
-        contentPane.add(passwordField1, gbc);
+        mainPanel.add(passwordField, gbc);
 
-        // ✅ AJOUTER LE CHECKBOX
-        gbc.gridx = 0;
+        // Checkbox Nouveau
+        isNouveauCheckBox = new JCheckBox("Créer nouveau compte");
+        isNouveauCheckBox.setFont(new Font("Arial", Font.PLAIN, 11));
+        gbc.gridx = 1;
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        contentPane.add(checkBoxNouveau, gbc);
+        mainPanel.add(isNouveauCheckBox, gbc);
 
-        // ✅ AJOUTER LES BOUTONS
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(buttonOK);
-        buttonPanel.add(buttonCancel);
+        // Panel Boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        btnLogin = creerBoutonModerne("Connexion", new Color(33, 150, 243));
+        btnCancel = creerBoutonModerne("Annuler", new Color(158, 158, 158));
 
+        buttonPanel.add(btnLogin);
+        buttonPanel.add(btnCancel);
+
+        // Ajouter le panel des boutons
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
-        contentPane.add(buttonPanel, gbc);
+        mainPanel.add(buttonPanel, gbc);
 
-        // ✅ DÉFINIR LE CONTENTPANE
-        setContentPane(contentPane);
-        getRootPane().setDefaultButton(buttonOK);
-        pack();
+        this.setContentPane(mainPanel);
 
-        // ✅ AJOUTER LES ACTIONLISTENERS
-        buttonOK.addActionListener(new ActionListener() {
+        // Listeners
+        btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                onOK();
+                try {
+                    if(loginListener != null) {
+                        loginListener.onLoginClicked(getUsername(), getPassword(), isNouveauChecked());
+                    }
+                } catch (Exception ex) {
+                    afficherMessageErreurLogin("Erreur : " + ex.getMessage());
+                    ex.printStackTrace();
+                }
             }
         });
 
-        buttonCancel.addActionListener(new ActionListener() {
+        btnCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                onCancel();
+                if(loginListener != null) {
+                    loginListener.onCancelClicked();
+                }
+                fermer();
             }
         });
-
-
-        // Fermer si on clique le X
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
-
-        // Fermer si on appuie sur ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    // ✅ Implémenter les méthodes de InterfaceLogin
+
+    private JButton creerBoutonModerne(String texte, Color couleur) {
+        JButton btn = new JButton(texte);
+        btn.setFont(new Font("Arial", Font.BOLD, 12));
+        btn.setPreferredSize(new Dimension(130, 35));
+        btn.setFocusPainted(false);
+        btn.setBackground(couleur);
+        btn.setForeground(Color.WHITE);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(couleur.brighter());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(couleur);
+            }
+        });
+
+        return btn;
+    }
 
     @Override
-    public String getUsername(){
-        // ✅ Retourner le texte du champ username
-        return textField1.getText();
+    public String getUsername() {
+        return usernameField.getText();
     }
 
     @Override
     public String getPassword() {
-        // ✅ Retourner le mot de passe
-        return new String(passwordField1.getPassword());
+        return new String(passwordField.getPassword());
     }
 
     @Override
     public boolean isNouveauChecked() {
-        // ✅ Retourner si le checkbox est coché
-        return checkBoxNouveau.isSelected();
-    }
-
-    @Override
-    public void fermer() {
-        // ✅ Fermer la dialog
-        dispose();
+        return isNouveauCheckBox.isSelected();
     }
 
     @Override
     public void setLoginListener(InterfaceLoginListener listener) {
-        // ✅ Enregistrer le listener (le contrôleur)
         this.loginListener = listener;
     }
 
-    // ✅ Méthode privée : appelée quand l'utilisateur clique OK
-    private void onOK() {
-        // ✅ Si un listener (contrôleur) est enregistré
-        if (loginListener != null){
-            // Appeler la méthode métier du contrôleur
-            loginListener.onLoginClicked(
-                    getUsername(),
-                    getPassword(),
-                    isNouveauChecked()
-            );
-        }
+    @Override
+    public void fermer() {
+        this.setVisible(false);
+        usernameField.setText("");
+        passwordField.setText("");
+        isNouveauCheckBox.setSelected(false);
     }
 
-    // ✅ Méthode privée : appelée quand l'utilisateur clique Cancel
-    private void onCancel() {
-        // ✅ Si un listener (contrôleur) est enregistré
-        if (loginListener != null){
-            loginListener.onCancelClicked();
-        }
-    }
-
-    public static void main(String[] args) {
-        LoginDialog dialog = new LoginDialog();
-        dialog.setVisible(true);
+    @Override
+    public void afficherMessageErreurLogin(String message) {
+        JOptionPane.showMessageDialog(this, message, "Erreur de connexion", JOptionPane.ERROR_MESSAGE);
     }
 }

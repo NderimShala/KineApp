@@ -1,7 +1,11 @@
+
 package View;
 
+
+import Contrats.InterfaceObjectif;
 import entity.Patient;
 import entity.Objectif;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -9,10 +13,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Vector;
+
 import Contrats.InterfacePatientModel;
-import Contrats.InterfaceAddObjectifListener;
-import Contrats.InterfaceSupprObjectifListener;
+import Contrats.InterfaceObjectif;
 
 public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JLabel nomLabel;
@@ -25,19 +28,21 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
     private JButton boutonSupprime;
     private JButton boutonValider;
 
-    private InterfaceAddObjectifListener listenerAdd;
-    private InterfaceSupprObjectifListener listenerSuppr;
+    private InterfaceObjectif listenerAdd;
+    private InterfaceObjectif listenerSuppr;
 
-    private java.util.Set<Integer> lignesValidees = new java.util.HashSet<>(); //variable pour stocker les lignes validées
+    private java.util.Set<Integer> lignesValidees = new java.util.HashSet<>();
 
     public JPanelPatient(){
         nomLabel = new JLabel();
         prenomLabel = new JLabel();
         mutuelleLabel = new JLabel();
         maladieLabel = new JLabel();
-        boutonAjout = new JButton("Ajouter");
-        boutonSupprime = new JButton("Supprimer");
-        boutonValider = new JButton("Valider");
+
+        // ✨ BOUTONS MODERNES AVEC COULEURS
+        boutonAjout = creerBoutonModerne("Ajouter", new Color(76, 175, 80));
+        boutonSupprime = creerBoutonModerne("Supprimer", new Color(244, 67, 54));
+        boutonValider = creerBoutonModerne("Valider", new Color(33, 150, 243));
 
         this.setLayout(new BorderLayout(15, 15));
         this.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -64,19 +69,15 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
 
         JScrollPane scrollPane = new JScrollPane(objectifsTable);
 
-        // ... après la création de objectifsTable ...
         objectifsTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-                // Si la ligne est dans notre liste de lignes validées
                 if (lignesValidees.contains(row)) {
-                    c.setBackground(new Color(144, 238, 144)); // Vert clair
+                    c.setBackground(new Color(144, 238, 144));
                     c.setForeground(Color.BLACK);
                 } else {
-                    // Couleur par défaut (blanc ou bleu si sélectionné)
                     c.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
                     c.setForeground(isSelected ? table.getSelectionForeground() : table.getForeground());
                 }
@@ -85,60 +86,97 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         });
 
         //panel pour les boutons
-        JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         panelBoutons.add(boutonAjout);
         panelBoutons.add(boutonValider);
         panelBoutons.add(boutonSupprime);
 
-
         // Ajouter les panels
         this.add(infoPanel, BorderLayout.NORTH);
         this.add(scrollPane, BorderLayout.CENTER);
-        this.add(panelBoutons,BorderLayout.SOUTH);
+        this.add(panelBoutons, BorderLayout.SOUTH);
 
-        //les listeners a mettre dans le controlllllleeeeeeeeeurrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr///////////////////////////////////////////////////////
-        ////////////////////////////////////
-        ////////////////////////////////////
-        ////////////////////////////////////
-        ////////////////////////////////////
+        // Listeners des boutons
         boutonAjout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(listenerAdd != null){
-                    listenerAdd.onAjouterObjectifClicked();
+                try{
+                    if(listenerAdd != null){
+                        listenerAdd.onAjouterObjectifClicked();
+                    }
+                }catch (Exception ex){
+                    afficherMessageErreur("Erreur lors de l'ajout de l'objectif : " + ex.getMessage());
+                    ex.printStackTrace();
                 }
-
             }
         });
+
         boutonSupprime.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(listenerSuppr != null){
-                    listenerSuppr.onSupprObjectifClicked();
+                try{
+                    if(listenerSuppr != null){
+                        listenerSuppr.onSupprObjectifClicked();
+                    }
+                }catch(Exception ex){
+                    afficherMessageErreur("Erreur : " + ex.getMessage());
+                    ex.printStackTrace();
                 }
             }
         });
+
         boutonValider.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int indice = objectifsTable.getSelectedRow();
-                if(indice != -1){
-                    lignesValidees.add(indice);
-                    objectifsTable.repaint();
+                try{
+                    int indice = objectifsTable.getSelectedRow();
+                    if(indice != -1){
+                        lignesValidees.add(indice);
+                        objectifsTable.repaint();
+                    } else {
+                        throw new Exception("Veuillez sélectionner un objectif à valider");
+                    }
+                }catch(Exception ex){
+                    afficherMessageErreur("Erreur : " + ex.getMessage());
+                    ex.printStackTrace();
                 }
-                else JOptionPane.showMessageDialog(null, "Veuillez sélectionner un objectif à valider.");
             }
         });
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
     }
 
-    public void setListenerAjouter(InterfaceAddObjectifListener listenerAdd){
+    // ✨ MÉTHODE UTILITAIRE - Créer des boutons modernes
+    private JButton creerBoutonModerne(String texte, Color couleur) {
+        JButton btn = new JButton(texte);
+
+        // Style moderne
+        btn.setFont(new Font("Arial", Font.BOLD, 12));
+        btn.setPreferredSize(new Dimension(150, 40));
+        btn.setFocusPainted(false);
+        btn.setBackground(couleur);
+        btn.setForeground(Color.WHITE);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet au survol
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(couleur.brighter());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(couleur);
+            }
+        });
+
+        return btn;
+    }
+
+    public void setListenerAjouter(InterfaceObjectif listenerAdd){
         this.listenerAdd = listenerAdd;
     }
-    public void setListenerSupprimer(InterfaceSupprObjectifListener listenerSuppr) {this.listenerSuppr = listenerSuppr; }
+
+    public void setListenerSupprimer(InterfaceObjectif listenerSuppr) {
+        this.listenerSuppr = listenerSuppr;
+    }
 
     public int getSelectedObjectifIndex(){
         return objectifsTable.getSelectedRow();
@@ -146,14 +184,12 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
 
     @Override
     public void afficherPatient(Patient patient) {
-        // Afficher les infos du patient
         nomLabel.setText("Nom : " + patient.getName());
         prenomLabel.setText("Prénom : " + patient.getFirstname());
         mutuelleLabel.setText("Mutuelle : " + patient.getMutuelle());
         maladieLabel.setText("Maladie : " + patient.getMaladie().getName());
 
-        // Remplir le tableau des objectifs
-        tableModel.setRowCount(0);  // Vider le tableau
+        tableModel.setRowCount(0);
 
         if (patient.getMaladie().getObjectif() != null) {
             for (Objectif obj : patient.getMaladie().getObjectif()) {
@@ -175,5 +211,10 @@ public class JPanelPatient extends JPanel implements InterfacePatientModel {
         boutonSupprime.setEnabled(false);
         boutonValider.setEnabled(false);
         boutonAjout.setEnabled(false);
+    }
+
+    @Override
+    public void afficherMessageErreur(String message){
+        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
     }
 }

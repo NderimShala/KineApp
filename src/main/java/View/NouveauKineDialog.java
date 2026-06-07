@@ -191,10 +191,23 @@ public class NouveauKineDialog extends JDialog implements InterfaceNouveauKine {
         dispose();
     }
 
+    @Override
+    public void afficherMessageSuccesKine(){
+        JOptionPane.showMessageDialog(this, "Kine créé avec succès", "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void afficherMessageErreurKine(String message){
+        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+    }
+
+
     private void onOK(){
-        if(listener != null){
-            listener.onNouveauKineClicked(usernameEnAttente, passwordEnAttente,getNom(), getPrenom(), getSpecialisation(), getInami(), getPhoto());
-        }
+        try{
+            if(listener != null){
+                listener.onNouveauKineClicked(usernameEnAttente, passwordEnAttente,getNom(), getPrenom(), getSpecialisation(), getInami(), getPhoto());
+            }
+        }catch (Exception e){afficherMessageErreurKine("Erreur : " + e.getMessage());}
     }
 
 

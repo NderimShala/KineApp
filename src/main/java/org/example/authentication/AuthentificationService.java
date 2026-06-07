@@ -3,6 +3,7 @@ package org.example.authentication;
 import Contrats.InterfaceAuthentification;
 import Contrats.InterfaceKineDAO;
 import Contrats.InterfaceUtilisateur;
+import Properties.PropertiesAuthenticationService;
 import java.util.Optional;
 
 import entity.Kine;
@@ -10,12 +11,15 @@ import entity.Kine;
 public class AuthentificationService implements InterfaceAuthentification{
     //référence au DAO
     private InterfaceKineDAO kineDAO;
-
+    private PropertiesAuthenticationService propertiesAuth;
     //stocker le kine actuellement connecté
     private InterfaceUtilisateur kineconnecte = null;
 
+
     public AuthentificationService(InterfaceKineDAO kineDAO){
+
         this.kineDAO = kineDAO;
+        this.propertiesAuth = new PropertiesAuthenticationService();
     }
 
     @Override
@@ -24,7 +28,7 @@ public class AuthentificationService implements InterfaceAuthentification{
             return null;
         }
         //vérifier mdp via DAO
-        if(!kineDAO.checkPassword(username, password)){
+        if(!propertiesAuth.authentication(username, password)){
             return null;
         }
         //récup Kine via DAO
@@ -53,8 +57,14 @@ public class AuthentificationService implements InterfaceAuthentification{
 
     @Override
     public InterfaceUtilisateur addKine(String username, String password, String name, String firstname, String specialisation, String inami, String photo){
+        if(propertiesAuth.usernameExists(username)){
+            throw new RuntimeException("ce username existe déjà");
+        }
         InterfaceUtilisateur newKine = new Kine(name, firstname, specialisation, inami, photo);
+        //ajouter dans le fichier kines.bin
         kineDAO.save(username, password, newKine);
+        //ajouter les credentials dans le fichier properties
+        propertiesAuth.addCredentials(username, password);
         return newKine;
     }
 }

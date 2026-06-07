@@ -132,6 +132,16 @@ public class AddPAtientDialog extends JDialog implements InterfaceNouveauPatient
     }
 
     @Override
+    public void afficherMessageErreurInfoManquante(String message) {
+        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public void afficherMessageSuccesPatient() {
+        JOptionPane.showMessageDialog(this, "Patient créé", "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
     public void setListener(InterfaceNouveauPatientListener listener) {
         this.listener = listener;
     }
@@ -147,10 +157,13 @@ public class AddPAtientDialog extends JDialog implements InterfaceNouveauPatient
     }
 
     private void onOk(){
-        if(listener!= null){
-            listener.onNouveauPatientClicked(getNom(), getPrenom(), getMutuelle(), getNomPatho());
-            this.setVisible(false);
-        }
+        try{
+            if(listener!= null){
+                listener.onNouveauPatientClicked(getNom(), getPrenom(), getMutuelle(), getNomPatho());
+                this.setVisible(false);
+            }
+
+        }catch (Exception e){afficherMessageErreurInfoManquante("Erreur : " + e.getMessage());}
     }
 
     public static void main(String[] args) {

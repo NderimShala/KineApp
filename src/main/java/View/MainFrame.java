@@ -1,8 +1,12 @@
 package View;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import Contrats.InterfaceMainFrame;
@@ -16,16 +20,20 @@ public class MainFrame extends JFrame implements InterfaceMainFrame{
 
     private InterfaceMenuListener loginMenuListener;
     public MainFrame() {
-
         super("KineAPP");
-        SwingUtilities.invokeLater(() -> {
-            try{
-                UIManager.setLookAndFeel(new FlatLightLaf());
 
-            }catch (Exception e){
-                System.err.println("flatlaf n'a pas pu etre chargé");
-            }
-        });
+        try {
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+
+            // Personnalisation des boutons
+            UIManager.put("Button.arc", 8); // Coins arrondis
+            UIManager.put("Button.focusWidth", 2);
+            UIManager.put("Component.focusWidth", 2);
+            UIManager.put("Button.foreground", new Color(255, 255, 255));
+        } catch (UnsupportedLookAndFeelException e) {
+            System.err.println("Erreur FlatLaf: " + e.getMessage());
+        }
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 600);
         setLocationRelativeTo(null);

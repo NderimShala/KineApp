@@ -10,12 +10,9 @@ import org.example.authentication.AuthentificationService;
 
 import entity.Kine;
 import entity.Patient;
-import entity.Pathologie;
 import entity.Objectif;
 
-import javax.swing.*;
-
-public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceAddObjectifListener, InterfaceSupprObjectifListener{
+public class appController implements InterfaceLoginListener, InterfaceMenuListener, InterfaceNouveauKineListener, InterfaceNouveauPatientListener, InterfaceObjectif  {
     private InterfaceKineModel interfaceKine; //stocker la ref à la vue
     private InterfacePatientModel interfacePatient;
     private InterfaceMainFrame interfaceMainFrame;
@@ -98,47 +95,50 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     }
 
     @Override
-    public void onLoginClicked(String username, String password,boolean nouveau){
-        System.out.println("tentative de connextion : username: "+username + "nouveau : " + nouveau);
+    public void onLoginClicked(String username, String password,boolean nouveau) throws Exception {
+        System.out.println("tentative de connextion : username: " + username + "nouveau : " + nouveau);
         System.out.println("utilisateurs existants : " + kineDAO);
-
-        if(username == null || username.isBlank() || password == null || password.isBlank()){
-            System.out.println("erruer : username ou password vide");
-            return;
-        }
-        if(nouveau){
-            System.out.println("nouvel utilisateur détecté");
-            this.usernameEnAttente = username;
-            this.passwordEnAttente = password;
-
-            interfaceLogin.fermer();
-
-            nouveauKineDialog.setVisible(true);
-        }
-        else{
-            System.out.println("tentative d'authentification pour : "+username);
-            InterfaceUtilisateur utilisateur = authentificationService.authentification(username, password);
-            if(utilisateur != null){
-                System.out.println("Login réussi pour : " + utilisateur.getName() + " " + utilisateur.getFirstname());
-
-                if(utilisateur instanceof Kine){
-                    Kine kine = (Kine)utilisateur;
-                    interfaceKine.afficherKine(kine);
-                }
-                interfaceMainFrame.desactiverMenuItemPatient();
-                interfaceMainFrame.activerMenuItemLogout();
-                interfaceMainFrame.desactiverMenuItemLogin();;
-                interfacePatient.activerBoutton();
-                interfaceMainFrame.activerMenuItemPatient();
+        try {
+            if (username == null || username.isBlank() || password == null || password.isBlank()) {
+                throw new Exception("Username ou password vide");
+            }
+            if (nouveau) {
+                System.out.println("nouvel utilisateur détecté");
+                this.usernameEnAttente = username;
+                this.passwordEnAttente = password;
 
                 interfaceLogin.fermer();
-        }
-            else{
-                System.out.println("login échoué");
-            }
-        }
 
+                nouveauKineDialog.setVisible(true);
+            }
+            else {
+                System.out.println("tentative d'authentification pour : " + username);
+                InterfaceUtilisateur utilisateur = authentificationService.authentification(username, password);
+                if (utilisateur != null) {
+                    System.out.println("Login réussi pour : " + utilisateur.getName() + " " + utilisateur.getFirstname());
+
+                    if (utilisateur instanceof Kine) {
+                        Kine kine = (Kine) utilisateur;
+                        interfaceKine.afficherKine(kine);
+                    }
+                    interfaceMainFrame.desactiverMenuItemPatient();
+                    interfaceMainFrame.activerMenuItemLogout();
+                    interfaceMainFrame.desactiverMenuItemLogin();
+                    ;
+                    interfacePatient.activerBoutton();
+                    interfaceMainFrame.activerMenuItemPatient();
+
+                    interfaceLogin.fermer();
+                }
+                else{
+                    throw new Exception("Login échoué veuillez réessayer");
+                }
+            }
+        }catch (Exception e){
+            loginDialog.afficherMessageErreurLogin("Erreur : " + e.getMessage());
+        }
     }
+
     @Override
     public void onCancelClicked(){
         interfaceLogin.fermer();
@@ -158,40 +158,58 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     }
 
     @Override
-    public void onNouveauKineClicked(String username, String password, String nom, String prenom, String specialisation, String inami, String photo){
+    public void onNouveauKineClicked(String username, String password, String nom, String prenom, String specialisation, String inami, String photo) throws Exception{
+        try{
+            InterfaceUtilisateur utilisateurCree = authentificationService.addKine(usernameEnAttente, passwordEnAttente, nom, prenom, specialisation, inami, photo);
+            System.out.println("Après addKine - résultat: " + utilisateurCree);
 
-        InterfaceUtilisateur utilisateurCree = authentificationService.addKine(usernameEnAttente, passwordEnAttente, nom, prenom, specialisation, inami, photo);
-        System.out.println("Après addKine - résultat: " + utilisateurCree);
+            if (utilisateurCree instanceof Kine) {
+                Kine kine = (Kine) utilisateurCree;
+                interfaceKine.afficherKine(kine);
+                authentificationService.authentification(username, password);
 
-        if (utilisateurCree instanceof Kine) {
-            Kine kine = (Kine) utilisateurCree;
-            interfaceKine.afficherKine(kine);
-            authentificationService.authentification(username, password);
-
-            nouveauKineDialog.fermer();
-        };
+                nouveauKineDialog.fermer();
 
 
-        interfaceMainFrame.desactiverMenuItemPatient();
-        interfaceMainFrame.activerMenuItemLogout();
-        interfaceMainFrame.desactiverMenuItemLogin();;
-        interfacePatient.activerBoutton();
-        interfaceMainFrame.activerMenuItemPatient();
+                interfaceMainFrame.desactiverMenuItemPatient();
+                interfaceMainFrame.activerMenuItemLogout();
+                interfaceMainFrame.desactiverMenuItemLogin();;
+                interfacePatient.activerBoutton();
+                interfaceMainFrame.activerMenuItemPatient();
 
-        nouveauKineDialog.fermer();
 
-        this.usernameEnAttente = null;
-        this.passwordEnAttente = null;
+                this.usernameEnAttente = null;
+                this.passwordEnAttente = null;
+            }
+            else{
+                throw new Exception("Erreur lors de la création du Kine");
+            }
+        } catch (Exception e){nouveauKineDialog.afficherMessageErreurKine("Erreur : " + e.getMessage());}
     }
 
     @Override
-    public void onNouveauPatientClicked(String nom, String prenom, String mutuelle, String nomPatho) {
-        Patient patient = patientService.creer(nom, prenom, mutuelle, nomPatho);
-        this.patientCourant = patient;
-        System.out.println("avant addPatient du DAO");
-        patientDAO.addPatient(patient);
-        System.out.println("après addPatient du DAO");
-        interfacePatient.afficherPatient(patient);
+    public void onNouveauPatientClicked(String nom, String prenom, String mutuelle, String nomPatho) throws Exception {
+        try {
+            if (nom == null || nom.isBlank() || prenom == null || prenom.isBlank() || nomPatho == null || nomPatho.isBlank()) {
+                throw new Exception("Informations manquantes");
+            }
+
+            Patient patient = patientService.creer(nom, prenom, mutuelle, nomPatho);
+            this.patientCourant = patient;
+            System.out.println("=== DEBUG CRÉATION PATIENT ===");
+            System.out.println("Nom du patient : '" + patient.getName() + "'");
+            System.out.println("Prénom du patient : '" + patient.getFirstname() + "'");
+            System.out.println("patient créé : " + patient.getName());
+            patientDAO.addPatient(patient);
+            System.out.println("Total patients sauvegardés : " + patientDAO.getAllPatients().size());
+            for (Patient p : patientDAO.getAllPatients()) {
+                System.out.println("  - Patient : " + p.getName());
+            }
+            System.out.println("==============================");
+            nouveauPatientDialog.afficherMessageSuccesPatient();
+            interfacePatient.afficherPatient(patient);
+            nouveauPatientDialog.fermer();
+        }catch (Exception e){nouveauPatientDialog.afficherMessageErreurInfoManquante(e.getMessage());}
     }
 
     @Override
@@ -206,30 +224,37 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
     }
 
     @Override
-    public void onAjouterObjectifClicked(){
-        String nomObjectif = objectifDialog.afficherEtRecupererNomObjectif();
-        if(nomObjectif != null && !nomObjectif.isBlank()){
-            Objectif objectif = objectifService.creer(nomObjectif);
+    public void onAjouterObjectifClicked() throws Exception {
+        try {
+            String nomObjectif = objectifDialog.afficherEtRecupererNomObjectif();
+            if (nomObjectif != null && !nomObjectif.isBlank()) {
+                Objectif objectif = objectifService.creer(nomObjectif);
 
-            if(patientCourant != null){
-                objectifService.ajouterObjectifPatient(patientCourant, objectif);
-                patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
-                interfacePatient.afficherPatient(patientCourant);
+                if (patientCourant != null) {
+                    objectifService.ajouterObjectifPatient(patientCourant, objectif);
+                    patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
+                    interfacePatient.afficherPatient(patientCourant);
+                }
             }
-        }
+            else throw new Exception("L'objectif ne peut être vide");
+        }catch (Exception e){objectifDialog.afficherMessageObjectifVide("Erreur :" + e.getMessage());}
     }
 
 
     @Override
-    public void onSupprObjectifClicked() {
-        if(patientCourant != null){
-            int indexSelected = patientPanel.getSelectedObjectifIndex();
-            if(indexSelected >= 0){
-                objectifService.supprimerObjectifPatient(patientCourant, indexSelected);
-                patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
-                interfacePatient.afficherPatient(patientCourant);
+    public void onSupprObjectifClicked() throws Exception {
+        try{
+            if(patientCourant != null){
+                int indexSelected = patientPanel.getSelectedObjectifIndex();
+                if(indexSelected >= 0){
+                    objectifService.supprimerObjectifPatient(patientCourant, indexSelected);
+                    patientDAO.updatePatient(patientDAO.getAllPatients().indexOf(patientCourant), patientCourant);
+                    interfacePatient.afficherPatient(patientCourant);
+                }
+                else throw new Exception("Aucun objectif sélectionné pour suppression");
             }
-        }
+        }catch (Exception e){patientPanel.afficherMessageErreur("Erreur : " + e.getMessage());}
+
     }
 
     @Override
@@ -269,5 +294,14 @@ public class appController implements InterfaceLoginListener, InterfaceMenuListe
                 JOptionPane.showMessageDialog(null, "patient inexistant", "erreur", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    @Override
+    public String afficherEtRecupererNomObjectif(){
+        return null;
+    }
+    @Override
+    public void afficherMessageObjectifVide(String message){
+
     }
 }

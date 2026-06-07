@@ -19,6 +19,13 @@ public class Patient extends Person implements Serializable {
         this.maladie = maladie;
     }
 
+    public String getName(){
+        return super.getName();
+    }
+    public void setName(String name){
+        super.setName(name);
+    }
+
     public String getMutuelle() {
         return mutuelle;
     }
